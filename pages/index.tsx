@@ -20,7 +20,7 @@ export default function Home({ articles }: { articles: any[] }) {
     );
 }
 
-export const getServerSideProps = async () => {
+export const getStaticProps = async () => {
     const response = await fetch('https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json');
     const { articles } = await response.json();
     return {
