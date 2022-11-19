@@ -1,7 +1,9 @@
 import Head from 'next/head';
 import React from 'react';
 
-const PageLayout = ({ children, title = 'NewsApp' }: { children?: React.ReactNode; title?: string }) => {
+type PageLayoutProps = { children?: React.ReactNode; title?: string };
+
+const PageLayout = ({ children, title = 'NewsApp' }: PageLayoutProps) => {
     return (
         <>
             <Head>
