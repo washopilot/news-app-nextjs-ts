@@ -1,25 +1,12 @@
-import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 
-import { useEffect, useState } from 'react';
 import PageLayout from '../components/PageLayout';
 
-export default function Home() {
-    const [articles, setArticles] = useState([] as any[]);
-
-    useEffect(() => {
-        fetch('https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json')
-            .then((res) => res.json())
-            .then((response) => {
-                const { articles } = response;
-                setArticles(articles);
-            });
-    }, []);
-
+export default function Home({ articles }: { articles: any[] }) {
     return (
         <PageLayout title="NewsApp - Home">
             <div className={styles.container}>
-                {articles.length == 0 && <p>Loading...</p>}
+                {articles.length == 0 && <p>No tenemos artículos</p>}
                 {articles.length > 0 &&
                     articles.map((article, idx) => (
                         <article key={idx}>
@@ -32,3 +19,13 @@ export default function Home() {
         </PageLayout>
     );
 }
+
+export const getServerSideProps = async () => {
+    const response = await fetch('https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json');
+    const { articles } = await response.json();
+    return {
+        props: {
+            articles
+        }
+    };
+};
