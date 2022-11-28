@@ -1,6 +1,7 @@
 import { InferGetStaticPropsType } from 'next';
-import Image from 'next/image';
+import Image, { ImageProps } from 'next/image';
 import { getPlaiceholder } from 'plaiceholder';
+import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import styles from '../styles/Home.module.css';
 
@@ -12,7 +13,7 @@ const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articl
             <div className={styles.container}>
                 {articles.length == 0 && <p>No tenemos artículos</p>}
                 <article>
-                    <Image
+                    <Img
                         src={imagenURL}
                         alt={`Image for the article`}
                         width={450}
@@ -25,7 +26,7 @@ const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articl
                 {articles.length > 0 &&
                     articles.map((article, idx) => (
                         <article key={idx}>
-                            <Image
+                            <Img
                                 src={article.urlToImage}
                                 alt={`Image for the article ${article.title}`}
                                 width={450}
@@ -46,6 +47,15 @@ const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articl
 
 export default Home;
 
+// Custom Img-loader
+const Img = (props: ImageProps) => {
+    const [blur, setBlur] = useState(false);
+
+    // eslint-disable-next-line jsx-a11y/alt-text
+    return <Image {...props} onLoadingComplete={() => setBlur(true)} className={blur ? styles.unblur : styles.blur} />;
+};
+
+//getStaticProps
 export const getStaticProps = async () => {
     const response = await fetch('https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json');
     const { articles }: { articles: any[] } = await response.json();
