@@ -1,25 +1,12 @@
+import { InferGetStaticPropsType } from 'next';
 import Image from 'next/image';
+import { getPlaiceholder } from 'plaiceholder';
 import PageLayout from '../components/PageLayout';
 import styles from '../styles/Home.module.css';
 
-const shimmer = (w: number, h: number) => `
-<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <defs>
-    <linearGradient id="g">
-      <stop stop-color="#333" offset="20%" />
-      <stop stop-color="#222" offset="50%" />
-      <stop stop-color="#333" offset="70%" />
-    </linearGradient>
-  </defs>
-  <rect width="${w}" height="${h}" fill="#333" />
-  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
-  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
-</svg>`;
-
-const toBase64 = (str: string) =>
-    typeof window === 'undefined' ? Buffer.from(str).toString('base64') : window.btoa(str);
-
-export default function Home({ articles }: { articles: any[] }) {
+const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articles, imagePaths, images }) => {
+    // console.log(articles, imagePaths);
+    // console.log(images);
     return (
         <PageLayout title="NewsApp - Home">
             <div className={styles.container}>
@@ -34,7 +21,7 @@ export default function Home({ articles }: { articles: any[] }) {
                                 height={300}
                                 placeholder="blur"
                                 style={{ maxWidth: '100%', height: 'auto' }}
-                                blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(450, 300))}`}
+                                blurDataURL={images[idx].blurDataURL}
                             />
 
                             <h2>{article.title}</h2>
@@ -44,14 +31,39 @@ export default function Home({ articles }: { articles: any[] }) {
             </div>
         </PageLayout>
     );
-}
+};
+
+export default Home;
 
 export const getStaticProps = async () => {
     const response = await fetch('https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json');
-    const { articles } = await response.json();
+    const { articles }: { articles: any[] } = await response.json();
+
+    const imagePaths = articles.map((article: { urlToImage: any }) => {
+        return article.urlToImage;
+    });
+
+    const images = await Promise.all(
+        imagePaths.map(async (src: string | Buffer) => {
+            const {
+                base64,
+                img: { width, height, ...img }
+            } = await getPlaiceholder(src);
+
+            return {
+                ...img,
+                // alt: 'Paint Splashes',
+                // title: 'Photo from Unsplash',
+                blurDataURL: base64
+            };
+        })
+    ).then((values) => values);
+
     return {
         props: {
-            articles
+            articles,
+            imagePaths,
+            images
         }
     };
 };
