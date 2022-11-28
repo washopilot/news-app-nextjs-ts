@@ -4,13 +4,24 @@ import { getPlaiceholder } from 'plaiceholder';
 import PageLayout from '../components/PageLayout';
 import styles from '../styles/Home.module.css';
 
-const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articles, imagePaths, images }) => {
-    // console.log(articles, imagePaths);
-    // console.log(images);
+const imagenURL = '/images/pexels-alesia-kozik-6065181.jpg';
+
+const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articles, blurImages, blurDataURL }) => {
     return (
         <PageLayout title="NewsApp - Home">
             <div className={styles.container}>
                 {articles.length == 0 && <p>No tenemos artículos</p>}
+                <article>
+                    <Image
+                        src={imagenURL}
+                        alt={`Image for the article`}
+                        width={450}
+                        height={300}
+                        placeholder="blur"
+                        style={{ maxWidth: '100%', height: 'auto' }}
+                        blurDataURL={blurDataURL}
+                    />
+                </article>
                 {articles.length > 0 &&
                     articles.map((article, idx) => (
                         <article key={idx}>
@@ -21,7 +32,7 @@ const Home: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ articl
                                 height={300}
                                 placeholder="blur"
                                 style={{ maxWidth: '100%', height: 'auto' }}
-                                blurDataURL={images[idx].blurDataURL}
+                                blurDataURL={blurImages[idx].blurDataURL}
                             />
 
                             <h2>{article.title}</h2>
@@ -43,7 +54,7 @@ export const getStaticProps = async () => {
         return article.urlToImage;
     });
 
-    const images = await Promise.all(
+    const blurImages = await Promise.all(
         imagePaths.map(async (src: string | Buffer) => {
             const {
                 base64,
@@ -59,11 +70,13 @@ export const getStaticProps = async () => {
         })
     ).then((values) => values);
 
+    const { base64: blurDataURL, img } = await getPlaiceholder(imagenURL);
+
     return {
         props: {
             articles,
-            imagePaths,
-            images
+            blurImages,
+            blurDataURL
         }
     };
 };
