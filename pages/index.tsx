@@ -1,9 +1,25 @@
-import { InferGetStaticPropsType } from 'next';
+import { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Image, { ImageProps } from 'next/image';
 import { getPlaiceholder } from 'plaiceholder';
 import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import styles from '../styles/Home.module.css';
+
+export interface Article {
+    source: Source;
+    author: null | string;
+    title: string;
+    description: string;
+    url: string;
+    urlToImage: string;
+    publishedAt: Date;
+    content: string;
+}
+
+export interface Source {
+    id: null | string;
+    name: string;
+}
 
 const imagenURL = '/images/pexels-alesia-kozik-6065181.jpg';
 
@@ -56,9 +72,13 @@ const Img = (props: ImageProps) => {
 };
 
 //getStaticProps
-export const getStaticProps = async () => {
+export const getStaticProps: GetStaticProps<{
+    articles: Article[];
+    blurImages: any;
+    blurDataURL: string;
+}> = async () => {
     const response = await fetch('https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json');
-    const { articles }: { articles: any[] } = await response.json();
+    const { articles } = await response.json();
 
     const imagePaths = articles.map((article: { urlToImage: any }) => {
         return article.urlToImage;
